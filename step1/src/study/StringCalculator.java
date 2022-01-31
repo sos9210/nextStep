@@ -1,3 +1,5 @@
+package study;
+
 import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -19,20 +21,28 @@ public class StringCalculator {
             return Stream.of(num.split(":|,")).mapToInt(Integer::parseInt).peek(v -> minusException(v)).toArray();
         }
     }
-    public void add(String num){
-        System.out.println(Arrays.stream(separatorConvertor(num)).sum());
+    public int add(String num){
+        int sum = Arrays.stream(separatorConvertor(num)).sum();
+        System.out.println(sum);
+        return sum;
     }
-    public void subtract(String num){
-        System.out.println(Arrays.stream(separatorConvertor(num)).reduce((x, y) -> x - y).getAsInt());
+    public int subtract(String num){
+        int asInt = Arrays.stream(separatorConvertor(num)).reduce((x, y) -> x - y).getAsInt();
+        System.out.println(asInt);
+        return asInt;
     }
-    public void multiply(String num){
-        System.out.println(Arrays.stream(separatorConvertor(num)).reduce((x, y) -> x * y).getAsInt());
+    public int multiply(String num){
+        int asInt = Arrays.stream(separatorConvertor(num)).reduce((x, y) -> x * y).getAsInt();
+        System.out.println(asInt);
+        return asInt;
     }
-    public void divide(String num){
-        System.out.println(Arrays.stream(separatorConvertor(num)).reduce((x, y) -> x / y).getAsInt());
+    public int divide(String num){
+        int asInt = Arrays.stream(separatorConvertor(num)).reduce((x, y) -> x / y).getAsInt();
+        System.out.println(asInt);
+        return asInt;
     }
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         StringCalculator cal = new StringCalculator();
         cal.add("1:2,3");
         cal.add("//;\\n1;2;3");
@@ -44,5 +54,5 @@ public class StringCalculator {
         cal.divide("//;\\n1;2;3");
         cal.divide("1:2,-3");
         cal.divide("//;\\n1;2;-3");
-    }
+    }*/
 }
