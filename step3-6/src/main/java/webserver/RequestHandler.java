@@ -6,10 +6,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -26,8 +28,24 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            byte[] body = HttpRequestUtils.getBytes(in);
-            if (body == null) return;
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            String line = br.readLine();
+
+            String path = line.split(" ")[1];
+            log.debug("path ... {}",path);
+            if(line == null){
+                return;
+            }
+
+            Map<String,String> headers = HttpRequestUtils.getHeaders(br, line);    //http메시지 데이터를 map에 저장해서 가져온다.
+
+            if(path.contains("/user/create")){
+                String parameters = IOUtils.readData(br,Integer.parseInt(headers.get("Content-Length")));   //http 메시지 본문 데이터를 가져온다
+                log.debug("parameters...  {}",parameters);
+                HttpRequestUtils.requestParams(parameters);
+                path = "/index.html";
+            }
+            byte[] body = Files.readAllBytes(Paths.get("./webapp"+path));
 
             DataOutputStream dos = new DataOutputStream(out);
             response200Header(dos, body.length);
