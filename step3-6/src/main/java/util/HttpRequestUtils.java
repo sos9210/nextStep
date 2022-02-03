@@ -13,8 +13,14 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import webserver.RequestHandler;
 
 public class HttpRequestUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpRequestUtils.class);
     /**
      * @param queryString은
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
@@ -68,12 +74,27 @@ public class HttpRequestUtils {
         }
         String path = line.split(" ")[1];
         byte[] body;
-        if(path != null || !path.equals("")){
-            body = Files.readAllBytes(Paths.get("./webapp"+path));
+        if(path != null && !path.equals("")){
+            int index = path.indexOf("?");
+            String requestPath = index > -1 ? getPath(path, index) : path;      //URL 파라미터가 있는지 여부에따라 동작
+            body = Files.readAllBytes(Paths.get("./webapp"+requestPath));
         }else{
             body = "Hello World".getBytes();
         }
         return body;
+    }
+
+    private static String getPath(String path, int index) {
+        requestParams(path, index);
+        String requestPath = "/index.html";
+        return requestPath;
+    }
+
+    private static void requestParams(String path, int index) {
+        String params = path.substring(index +1);
+        Map<String, String> queryMap = parseQueryString(params);
+        User user = new User(queryMap.get("userId"),queryMap.get("password"),queryMap.get("name"),queryMap.get("email"));
+        log.debug("user  ....  {}",user);
     }
 
     public static class Pair {
