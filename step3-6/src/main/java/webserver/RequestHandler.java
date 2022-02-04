@@ -65,17 +65,21 @@ public class RequestHandler extends Thread {
                 }
                 bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
                 responseBody(dos, bytes);
-            }else if(path.equals("/user/list.html")){
+            }else if(path.equals("/user/list.html")) {
                 Map<String, String> cookie = HttpRequestUtils.parseCookies(httpMessage.get("Cookie"));
-                if(!cookie.getOrDefault("logined","false").equals("true")){
+                if (!cookie.getOrDefault("logined", "false").equals("true")) {
                     bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
                     response302Header(dos);
-                }else{
+                } else {
                     Collection<User> all = DataBase.findAll();      //모든 회원 조회
                     StringBuilder createListHtml = listHtml(all);   //html 동적 생성
                     bytes = createListHtml.toString().getBytes(StandardCharsets.UTF_8);
                     response200Header(dos, bytes.length);
                 }
+                responseBody(dos, bytes);
+            }else if(path.endsWith(".css")){
+                bytes = Files.readAllBytes(Paths.get("./webapp"+path));
+                responseCssHeader(dos,bytes.length);
                 responseBody(dos, bytes);
             }else{
                 bytes = Files.readAllBytes(Paths.get("./webapp"+path));
@@ -111,6 +115,19 @@ public class RequestHandler extends Thread {
             log.error("header200 error ... {}",e.getMessage());
         }
     }
+    private void responseCssHeader(DataOutputStream dos, int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error("css200 error ... {}",e.getMessage());
+            e.printStackTrace();
+            log.error("css200 error ... {}",e.getMessage());
+        }
+    }
+
     private void response302Header(DataOutputStream dos) {
         try {
             dos.writeBytes("HTTP/1.1 302 Found\r\n");
