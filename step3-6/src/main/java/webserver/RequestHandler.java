@@ -49,18 +49,28 @@ public class RequestHandler extends Thread {
                 User user = HttpRequestUtils.requestParams(parameters);
                 DataBase.addUser(user);
                 response302Header(dos);
-            }else if(path.equals("/user/login")){
+            }else if(path.equals("/user/login")) {
                 String parameters = IOUtils.readData(br, Integer.parseInt(httpMessage.get("Content-Length")));
                 User loginUser = HttpRequestUtils.requestParams(parameters);
                 User findUser = DataBase.findUserById(loginUser.getUserId());
-                if(findUser != null && loginUser.getPassword().equals(findUser.getPassword())){
-                    responseLoginHeader(dos,true);
+                if (findUser != null && loginUser.getPassword().equals(findUser.getPassword())) {
+                    responseLoginHeader(dos, true);
                     log.debug("success login");
-                }else{
-                    responseLoginHeader(dos,false);
+                } else {
+                    responseLoginHeader(dos, false);
                     log.debug("fail login");
                 }
                 bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
+                responseBody(dos, bytes);
+            }else if(path.equals("/user/list.html")){
+                Map<String, String> cookie = HttpRequestUtils.parseCookies(httpMessage.get("Cookie"));
+                if(!cookie.getOrDefault("logined","false").equals("true")){
+                    bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
+                    response302Header(dos);
+                }else{
+                    bytes = Files.readAllBytes(Paths.get("./webapp"+path));
+                    response200Header(dos, bytes.length);
+                }
                 responseBody(dos, bytes);
             }else{
                 bytes = Files.readAllBytes(Paths.get("./webapp"+path));
