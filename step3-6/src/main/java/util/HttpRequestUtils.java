@@ -67,29 +67,7 @@ public class HttpRequestUtils {
         return getKeyValue(header, ": ");
     }
 
-/*    public static byte[] getBytes(InputStream in) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-        String line = br.readLine();
-
-        String path = line.split(" ")[1];
-        log.debug("path ... {}",path);
-        if(line == null){
-            return null;
-        }
-
-        Map<String,String> headers = getHeaders(br, line);    //http메시지 데이터를 map에 저장해서 가져온다.
-
-        if(path.contains("/user/create")){
-            String parameters = IOUtils.readData(br,Integer.parseInt(headers.get("Content-Length")));   //http 메시지 본문 데이터를 가져온다
-            log.debug("parameters...  {}",parameters);
-            requestParams(parameters);
-            path = "/index.html";
-        }
-        byte[] body = Files.readAllBytes(Paths.get("./webapp"+path));
-        return body;
-    }*/
-
-    public static Map<String,String> getHeaders(BufferedReader br, String line) throws IOException {
+    public static Map<String,String> getHttpMessage(BufferedReader br, String line) throws IOException {
         String read = null;
         Map<String,String> map = new HashMap<>();
         while(!"".equals(read)){
@@ -103,10 +81,11 @@ public class HttpRequestUtils {
         return map;
     }
 
-    public static void requestParams(String parameters) {
+    public static User requestParams(String parameters) {
         Map<String, String> queryMap = parseQueryString(parameters);
         User user = new User(queryMap.get("userId"),queryMap.get("password"),queryMap.get("name"),queryMap.get("email"));
         log.debug("user  ....  {}",user);
+        return user;
     }
 
     public static class Pair {
