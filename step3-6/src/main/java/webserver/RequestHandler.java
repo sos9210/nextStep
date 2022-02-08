@@ -15,6 +15,7 @@ import db.DataBase;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequest;
 import util.HttpRequestUtils;
 import util.IOUtils;
 
@@ -33,28 +34,18 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            String line = br.readLine();
-
-            String path = line.split(" ")[1];
-            log.debug("path ... {}",path);
-            if(line == null){
-                return;
-            }
-
-            Map<String,String> httpMessage = HttpRequestUtils.getHttpMessage(br, line);    //http메시지 데이터를 map에 저장해서 가져온다.
+            HttpRequest httpRequest = new HttpRequest(in);
 
             DataOutputStream dos = new DataOutputStream(out);
             byte[] bytes;
-            if(path.equals("/user/create")) {
-                String parameters = IOUtils.readData(br, Integer.parseInt(httpMessage.get("Content-Length")));   //http 메시지 본문 데이터를 가져온다
-                log.debug("parameters...  {}", parameters);
-                User user = HttpRequestUtils.requestParams(parameters);
+            if(httpRequest.getPath().equals("/user/create")) {
+                User user =  new User(httpRequest.getParameter("userId"), httpRequest.getParameter("password"),
+                                httpRequest.getParameter("name"),httpRequest.getParameter("email"));
                 DataBase.addUser(user);
                 response302Header(dos);
-            }else if(path.equals("/user/login")) {
-                String parameters = IOUtils.readData(br, Integer.parseInt(httpMessage.get("Content-Length")));
-                User loginUser = HttpRequestUtils.requestParams(parameters);
+            }else if(httpRequest.getPath().equals("/user/login")) {
+                User loginUser = new User(httpRequest.getParameter("userId"), httpRequest.getParameter("password"),
+                                httpRequest.getParameter("name"),httpRequest.getParameter("email"));
                 User findUser = DataBase.findUserById(loginUser.getUserId());
                 if (findUser != null && loginUser.getPassword().equals(findUser.getPassword())) {
                     responseLoginHeader(dos, true);
@@ -65,8 +56,8 @@ public class RequestHandler extends Thread {
                 }
                 bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
                 responseBody(dos, bytes);
-            }else if(path.equals("/user/list.html")) {
-                Map<String, String> cookie = HttpRequestUtils.parseCookies(httpMessage.get("Cookie"));
+            }else if(httpRequest.getPath().equals("/user/list.html")) {
+                Map<String, String> cookie = HttpRequestUtils.parseCookies(httpRequest.getHeader("Cookie"));
                 if (!cookie.getOrDefault("logined", "false").equals("true")) {
                     bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
                     response302Header(dos);
@@ -77,12 +68,12 @@ public class RequestHandler extends Thread {
                     response200Header(dos, bytes.length);
                 }
                 responseBody(dos, bytes);
-            }else if(path.endsWith(".css")){
-                bytes = Files.readAllBytes(Paths.get("./webapp"+path));
+            }else if(httpRequest.getPath().endsWith(".css")){
+                bytes = Files.readAllBytes(Paths.get("./webapp"+httpRequest.getPath()));
                 responseCssHeader(dos,bytes.length);
                 responseBody(dos, bytes);
             }else{
-                bytes = Files.readAllBytes(Paths.get("./webapp"+path));
+                bytes = Files.readAllBytes(Paths.get("./webapp"+httpRequest.getPath()));
                 response200Header(dos, bytes.length);
                 responseBody(dos, bytes);
             }
