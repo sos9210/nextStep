@@ -2,28 +2,26 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import controller.Controller;
 import db.DataBase;
+import http.HttpResponse;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.HttpRequest;
+import http.HttpRequest;
 import util.HttpRequestUtils;
-import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
-
+    private Controller controller;
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
     }
@@ -34,53 +32,45 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            HttpRequest httpRequest = new HttpRequest(in);
+            HttpRequest request = new HttpRequest(in);
+            HttpResponse response = new HttpResponse(out);
 
-            DataOutputStream dos = new DataOutputStream(out);
-            byte[] bytes;
-            if(httpRequest.getPath().equals("/user/create")) {
-                User user =  new User(httpRequest.getParameter("userId"), httpRequest.getParameter("password"),
-                                httpRequest.getParameter("name"),httpRequest.getParameter("email"));
+            if(request.getPath().equals("/user/create")) {
+                User user =  new User(request.getParameter("userId"), request.getParameter("password"),
+                                request.getParameter("name"),request.getParameter("email"));
                 DataBase.addUser(user);
-                response302Header(dos);
-            }else if(httpRequest.getPath().equals("/user/login")) {
-                User loginUser = new User(httpRequest.getParameter("userId"), httpRequest.getParameter("password"),
-                                httpRequest.getParameter("name"),httpRequest.getParameter("email"));
+                response.sendRedirect("/index.html");
+            }else if(request.getPath().equals("/user/login")) {
+                User loginUser = new User(request.getParameter("userId"), request.getParameter("password"),
+                                request.getParameter("name"),request.getParameter("email"));
                 User findUser = DataBase.findUserById(loginUser.getUserId());
                 if (findUser != null && loginUser.getPassword().equals(findUser.getPassword())) {
-                    responseLoginHeader(dos, true);
+                    response.addHeader("Set-Cookie","logined=true");
+                    response.sendRedirect("/index.html");
                     log.debug("success login");
                 } else {
-                    responseLoginHeader(dos, false);
+                    response.addHeader("Set-Cookie","logined=false");
+                    response.sendRedirect("/index.html");
                     log.debug("fail login");
                 }
-                bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
-                responseBody(dos, bytes);
-            }else if(httpRequest.getPath().equals("/user/list.html")) {
-                Map<String, String> cookie = HttpRequestUtils.parseCookies(httpRequest.getHeader("Cookie"));
+            }else if(request.getPath().equals("/user/list.html")) {
+                Map<String, String> cookie = HttpRequestUtils.parseCookies(request.getHeader("Cookie"));
                 if (!cookie.getOrDefault("logined", "false").equals("true")) {
-                    bytes = Files.readAllBytes(Paths.get("./webapp/index.html"));
-                    response302Header(dos);
+                    response.sendRedirect("/index.html");
                 } else {
                     Collection<User> all = DataBase.findAll();      //모든 회원 조회
                     StringBuilder createListHtml = listHtml(all);   //html 동적 생성
-                    bytes = createListHtml.toString().getBytes(StandardCharsets.UTF_8);
-                    response200Header(dos, bytes.length);
+                    response.forwardBody(createListHtml.toString());
                 }
-                responseBody(dos, bytes);
-            }else if(httpRequest.getPath().endsWith(".css")){
-                bytes = Files.readAllBytes(Paths.get("./webapp"+httpRequest.getPath()));
-                responseCssHeader(dos,bytes.length);
-                responseBody(dos, bytes);
             }else{
-                bytes = Files.readAllBytes(Paths.get("./webapp"+httpRequest.getPath()));
-                response200Header(dos, bytes.length);
-                responseBody(dos, bytes);
+                response.forward(request.getPath());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
+            e.printStackTrace();
         }
     }
+/*
     private void responseLoginHeader(DataOutputStream dos, boolean loginYn) {
         try {
             dos.writeBytes("HTTP/1.1 302 Found\r\n");
@@ -141,6 +131,7 @@ public class RequestHandler extends Thread {
             log.error("body error ... {}",e.getMessage());
         }
     }
+*/
 
     private StringBuilder listHtml(Collection<User> users){
         StringBuilder html = new StringBuilder();
