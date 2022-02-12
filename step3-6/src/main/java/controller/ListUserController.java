@@ -12,8 +12,7 @@ import java.util.Map;
 public class ListUserController extends AbstractController{
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        Map<String, String> cookie = HttpRequestUtils.parseCookies(request.getHeader("Cookie"));
-        if (!cookie.getOrDefault("logined", "false").equals("true")) {
+        if (!request.getCookie("logined").equals("true")) {
             response.sendRedirect("/index.html");
         } else {
             Collection<User> all = DataBase.findAll();      //모든 회원 조회

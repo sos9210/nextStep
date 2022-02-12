@@ -12,19 +12,22 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpRequest {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+
     private Map<String,String> headerMap = new HashMap<>();
     private Map<String,String> paramMap = new HashMap<>();
     private RequestLine requestLine;
+    private HttpMethod httpMethod;
+
     public HttpRequest(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         requestLine = new RequestLine(br);
         setHeader(br);
-        if("POST".equals(getMethod())){
+        httpMethod = HttpMethod.valueOf(getMethod());
+        if(httpMethod.isPost()){
             String body = IOUtils.readData(br,Integer.parseInt(headerMap.get("Content-Length")));
             paramMap = HttpRequestUtils.parseQueryString(body);
         }else{
@@ -32,6 +35,9 @@ public class HttpRequest {
         }
     }
 
+    public String getCookie(String name){
+        return HttpRequestUtils.parseCookies(getHeader("Cookie")).get(name);
+    }
     public String getMethod(){
         return requestLine.getMethod();
     }
