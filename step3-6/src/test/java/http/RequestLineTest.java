@@ -14,7 +14,9 @@ public class RequestLineTest {
     public void get_method() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader("./src/test/resources/RequestLine_GET.txt"));
         RequestLine line = new RequestLine(br);
-        Assert.assertEquals("GET",line.getMethod());
+        HttpMethod httpMethod = HttpMethod.valueOf(line.getMethod());
+
+        Assert.assertTrue(httpMethod.isGet());
         Assert.assertEquals("/index.html",line.getPath());
     }
     @Test
@@ -22,7 +24,9 @@ public class RequestLineTest {
         BufferedReader br = new BufferedReader(new FileReader("./src/test/resources/Http_GET.txt"));
         RequestLine line = new RequestLine(br);
         Map<String,String> map = line.getParamMap();
-        Assert.assertEquals("GET",line.getMethod());
+        HttpMethod httpMethod = HttpMethod.valueOf(line.getMethod());
+
+        Assert.assertTrue(httpMethod.isGet());
         Assert.assertEquals("/user/create",line.getPath());
         Assert.assertEquals("asdf1234",map.get("userId"));
         Assert.assertEquals("1234",map.get("password"));

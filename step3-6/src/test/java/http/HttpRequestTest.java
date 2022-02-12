@@ -1,6 +1,7 @@
 package http;
 
 import http.HttpRequest;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -17,8 +18,9 @@ public class HttpRequestTest {
     public void request_GET() throws Exception {
         InputStream in = new FileInputStream(new File(testDirectory + "Http_GET.txt"));
         HttpRequest request = new HttpRequest(in);
+        HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
 
-        assertEquals("GET",request.getMethod());
+        assertTrue(httpMethod.isGet());
         assertEquals("/user/create",request.getPath());
         assertEquals("keep-alive",request.getHeader("Connection"));
         assertEquals("asdf1234",request.getParameter("userId"));
@@ -27,8 +29,9 @@ public class HttpRequestTest {
     public void request_POST() throws Exception {
         InputStream in = new FileInputStream(new File(testDirectory + "Http_POST.txt"));
         HttpRequest request = new HttpRequest(in);
+        HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
 
-        assertEquals("POST",request.getMethod());
+        assertTrue(httpMethod.isPost());
         assertEquals("/user/create",request.getPath());
         assertEquals("keep-alive",request.getHeader("Connection"));
         assertEquals("asdf1234",request.getParameter("userId"));

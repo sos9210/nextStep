@@ -64,8 +64,6 @@ public class HttpResponse {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             writeHeader();
-//            dos.writeBytes("Content-Type: "+headerMap.get("Content-Type")+";charset=utf-8\r\n");
-//            dos.writeBytes("Content-Length: " + Integer.parseInt(headerMap.get("Content-Length")) + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             e.printStackTrace();
