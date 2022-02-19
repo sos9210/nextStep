@@ -11,8 +11,9 @@ step3-6/.idea/**/*
 step6/.idea/**/*
 servlet/.idea/**/*
 apache-tomcat-9.0.58/**/*
-Step6/tomcat.8080/**/*
+**/tomcat.8080/**/*
 mvc1/.idea/**/*
+**/target/**/*
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using
