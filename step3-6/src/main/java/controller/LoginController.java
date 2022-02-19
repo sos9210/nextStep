@@ -6,7 +6,9 @@ import http.HttpResponse;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import webserver.RequestHandler;
+import http.HttpSession;
+
+import java.util.UUID;
 
 public class LoginController extends AbstractController{
 
@@ -18,7 +20,8 @@ public class LoginController extends AbstractController{
                 request.getParameter("name"),request.getParameter("email"));
         User findUser = DataBase.findUserById(loginUser.getUserId());
         if (findUser != null && loginUser.getPassword().equals(findUser.getPassword())) {
-            response.addHeader("Set-Cookie","logined=true");
+            HttpSession session = request.getSessions();
+            session.setAttribute("user",findUser);
             response.sendRedirect("/index.html");
             log.debug("success login");
         } else {
