@@ -12,7 +12,7 @@ import java.util.Map;
 public class ListUserController extends AbstractController{
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        if (!request.getCookie("logined").equals("true")) {
+        if (isLogin(request)) {
             response.sendRedirect("/index.html");
         } else {
             Collection<User> all = DataBase.findAll();      //모든 회원 조회
@@ -21,6 +21,9 @@ public class ListUserController extends AbstractController{
         }
     }
 
+    private boolean isLogin(HttpRequest request) {
+        return request.getSessions().getAttribute("user") == null;
+    }
 
 
     private StringBuilder listHtml(Collection<User> users){

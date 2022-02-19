@@ -34,7 +34,15 @@ public class HttpRequest {
             paramMap = requestLine.getParamMap();
         }
     }
+    //서버에 저장된 세션ID정보들중에 쿠키값으로 넘어온 세션ID와 일치하는 세션을 반환한다.
+    public HttpSession getSessions(){
+        return HttpSessions.getSession(getCookies().getCookie("JSESSIONID"));
+    }
 
+    // 클라이언트의 쿠키정보가 모두 담긴다.
+    public HttpCookie getCookies(){
+        return new HttpCookie(getHeader("Cookie"));
+    }
     public String getCookie(String name){
         return HttpRequestUtils.parseCookies(getHeader("Cookie")).get(name);
     }
