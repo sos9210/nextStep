@@ -1,8 +1,6 @@
 package next.front;
 
-import javassist.NotFoundException;
 import next.controller.Controller;
-import next.controller.CreateUserGetController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +15,11 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/", loadOnStartup = 1)
 public class DispatcherServlet extends HttpServlet {
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private final String DEFAULT_REDIRECT_PREFIX = "redirect:";
     private RequestMapping mapping;
 
-    public DispatcherServlet(){
+    @Override
+    public void init(){
         mapping = new RequestMapping();
         mapping.init();
     }
@@ -32,18 +32,20 @@ public class DispatcherServlet extends HttpServlet {
             return;
         }
         try {
-            String view = controller.excute(request, response);
+            String viewName = controller.excute(request, response);
 
-            if(view.startsWith("redirect:")){
-                response.sendRedirect(view);
-            }else{
-                RequestDispatcher rd = request.getRequestDispatcher(view);
-                rd.forward(request,response);
-            }
+            move(request, response, viewName);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-
+    private void move(HttpServletRequest request, HttpServletResponse response, String viewName) throws IOException, ServletException {
+        if(viewName.startsWith(DEFAULT_REDIRECT_PREFIX)){
+            response.sendRedirect(viewName.substring(DEFAULT_REDIRECT_PREFIX.length()));
+            return;
+        }
+        RequestDispatcher rd = request.getRequestDispatcher(viewName);
+        rd.forward(request, response);
     }
 }

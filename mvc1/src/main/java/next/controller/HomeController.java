@@ -11,14 +11,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import core.db.DataBase;
 
-@WebServlet("")
-public class HomeController extends HttpServlet {
+public class HomeController implements Controller {
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("users", DataBase.findAll());
-        RequestDispatcher rd = req.getRequestDispatcher("index.jsp");
-        rd.forward(req, resp);
+    public String excute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        request.setAttribute("users", DataBase.findAll());
+        return "home.jsp";
     }
 }
