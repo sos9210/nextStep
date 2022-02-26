@@ -1,13 +1,11 @@
 package next.dao;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.jdbc.ConnectionManager;
 import next.model.User;
 
 public class UserDao {
@@ -15,7 +13,16 @@ public class UserDao {
     public void insert(User user) throws SQLException {
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
-        jdbcTemplate.update("INSERT INTO USERS VALUES (?, ?, ?, ?)",user);
+        PreparedStatementSetter pss = new PreparedStatementSetter() {
+            @Override
+            public void setValue(PreparedStatement pstmt) throws SQLException {
+                pstmt.setString(1, user.getUserId());
+                pstmt.setString(2, user.getPassword());
+                pstmt.setString(3, user.getName());
+                pstmt.setString(4, user.getEmail());
+            };
+        };
+        jdbcTemplate.update("INSERT INTO USERS VALUES (?, ?, ?, ?)", pss);
     }
 
 /*    String createQueryForInsert() {
@@ -42,7 +49,7 @@ public class UserDao {
 
         };*/
 //        jdbcTemplate.update("UPDATE USERS SET PASSWORD = ?, NAME = ?, EMAIL = ? WHERE USERID = ?",user);
-        jdbcTemplate.update("UPDATE USERS SET PASSWORD = ?, NAME = ?, EMAIL = ? WHERE USERID = ?", new PreparedStatementSetter() {
+        PreparedStatementSetter pss = new PreparedStatementSetter() {
             @Override
             public void setValue(PreparedStatement pstmt) throws SQLException {
                 pstmt.setString(1, user.getPassword());
@@ -50,7 +57,10 @@ public class UserDao {
                 pstmt.setString(3, user.getEmail());
                 pstmt.setString(4, user.getUserId());
             };
-        });
+        };
+
+//        jdbcTemplate.update("UPDATE USERS SET PASSWORD = ?, NAME = ?, EMAIL = ? WHERE USERID = ?", pss);
+        jdbcTemplate.update("UPDATE USERS SET PASSWORD = ?, NAME = ?, EMAIL = ? WHERE USERID = ?", user.getPassword(),user.getName(),user.getEmail(),user.getUserId());
     }
 
 /*    void setValueForUpdate(User user, PreparedStatement pstmt) throws SQLException {
@@ -65,7 +75,7 @@ public class UserDao {
         return sql;
     }*/
 
-    public List<User> findAll() throws SQLException {
+    public List findAll() throws SQLException {
 
         JdbcTemplate select = new JdbcTemplate(); /*{
 
@@ -79,12 +89,15 @@ public class UserDao {
                 return objects;
             }
         };*/
-        RowMapper<User> rowMapper = new RowMapper<User>() {
+        RowMapper<List> rowMapper = new RowMapper<List>() {
             @Override
-            public User mapRow(ResultSet rs) throws SQLException {
-                    User user = new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"),
-                            rs.getString("email"));
-                return user;
+            public List mapRow(ResultSet rs) throws SQLException {
+                List users = new ArrayList<>();
+                if(rs.next()){
+                    users.add(new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"),
+                            rs.getString("email")));
+                }
+                return users;
             }
         };
         PreparedStatementSetter pss = new PreparedStatementSetter() {
@@ -92,6 +105,7 @@ public class UserDao {
             public void setValue(PreparedStatement pstmt) throws SQLException {
             }
         };
+
         return select.query("SELECT * FROM USERS",rowMapper,pss);
 /*        Connection con = null;
         PreparedStatement pstmt = null;
@@ -139,7 +153,7 @@ public class UserDao {
             }
         };
 
-  //      return select.queryForObject("SELECT userId, password, name, email FROM USERS WHERE userid=?", rowMapper,pss);
+//        return select.queryForObject("SELECT userId, password, name, email FROM USERS WHERE userid=?", rowMapper,pss);
         return select.queryForObject("SELECT userId, password, name, email FROM USERS WHERE userid=?",rowMapper,userId);
 
 /*        Connection con = null;
