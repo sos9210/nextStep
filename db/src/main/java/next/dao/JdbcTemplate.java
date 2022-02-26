@@ -11,14 +11,13 @@ import java.util.List;
 
 public class JdbcTemplate {
     public <T> List<T> query(String sql, RowMapper<T> rowMapper, PreparedStatementSetter pss) throws SQLException {
-        List row = null;
         try(Connection con = ConnectionManager.getConnection();
             PreparedStatement pstmt = con.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();){
             pss.setValue(pstmt);
-            row = (List) rowMapper.mapRow(rs);
+            List row = (List) rowMapper.mapRow(rs);
+            return row;
         }
-        return row;
     }
     public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... objects) throws SQLException {
         List row = null;
@@ -35,8 +34,9 @@ public class JdbcTemplate {
     public <T> T queryForObject(String sql,RowMapper<T> rowMapper,PreparedStatementSetter pss) throws SQLException{
         try(Connection con = ConnectionManager.getConnection();
             PreparedStatement pstmt = con.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery();) {
+            ) {
             pss.setValue(pstmt);
+            ResultSet rs = pstmt.executeQuery();
             T object = rowMapper.mapRow(rs);
             return object;
         }
@@ -44,10 +44,11 @@ public class JdbcTemplate {
     public <T> T queryForObject(String sql,RowMapper<T> rowMapper,Object... objects) throws SQLException{
         try(Connection con = ConnectionManager.getConnection();
             PreparedStatement pstmt = con.prepareStatement(sql);
-            ResultSet rs = pstmt.executeQuery();) {
+            ) {
             for (int i = 0; i < objects.length; i++) {
                 pstmt.setObject(i+1,objects[i]);
             }
+            ResultSet rs = pstmt.executeQuery();
             T object = rowMapper.mapRow(rs);
             return object;
         }
@@ -55,9 +56,8 @@ public class JdbcTemplate {
     public void update(String sql, Object... objects) throws SQLException{
         try(Connection con = ConnectionManager.getConnection();
             PreparedStatement pstmt = con.prepareStatement(sql);) {
-            for (int i = 0; i < objects.length; i++) {
-                pstmt.setObject(i+1,objects[i]);
-            }
+            PreparedStatementSetter pss = createPreparedStatementSetter(objects);
+            pss.setValue(pstmt);
             pstmt.executeUpdate();
         }
     }
