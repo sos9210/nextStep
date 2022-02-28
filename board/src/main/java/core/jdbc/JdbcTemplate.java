@@ -8,18 +8,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JdbcTemplate {
-    public void update(String sql, PreparedStatementSetter pss) throws DataAccessException {
+    public int update(String sql, PreparedStatementSetter pss) throws DataAccessException {
         try (Connection conn = ConnectionManager.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pss.setParameters(pstmt);
-            pstmt.executeUpdate();
+            int result = pstmt.executeUpdate();
+            return result;
         } catch (SQLException e) {
             throw new DataAccessException(e);
         }
     }
 
-    public void update(String sql, Object... parameters) {
-        update(sql, createPreparedStatementSetter(parameters));
+    public int update(String sql, Object... parameters) {
+        return update(sql, createPreparedStatementSetter(parameters));
+    }
+
+    public int insert(String sql, PreparedStatementSetter pss) throws DataAccessException {
+        try (Connection conn = ConnectionManager.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pss.setParameters(pstmt);
+            pstmt.executeUpdate();
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if(rs.next()){
+                return rs.getInt(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        }
+    }
+
+    public int insert(String sql, Object... parameters) {
+        return insert(sql, createPreparedStatementSetter(parameters));
     }
 
     public <T> T queryForObject(String sql, RowMapper<T> rm, PreparedStatementSetter pss) {
