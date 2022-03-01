@@ -13,24 +13,27 @@
 	<div class="col-md-12 col-sm-12 col-lg-10 col-lg-offset-1">
 		<div class="panel panel-default qna-list">
 			<ul class="list">
+			<c:forEach items="${board}" var="list">
 				<li>
 					<div class="wrap">
 						<div class="main">
 							<strong class="subject">
-								<a href="./qna/show.jsp">국내에서 Ruby on Rails와 Play가 활성화되기 힘든 이유는 뭘까?</a>
+								<a href="./qna/show?questionId=<c:out value='${list.questionId}'/>"><c:out value="${list.title}"/></a>
 							</strong>
 							<div class="auth-info">
 								<i class="icon-add-comment"></i>
-								<span class="time">2016-01-15 18:47</span>
+								<span class="time"><c:out value="${list.createdDate}"/></span>
 								<a href="./user/profile.jsp" class="author">자바지기</a>
 							</div>
 							<div class="reply" title="댓글">
 								<i class="icon-reply"></i>
-								<span class="point">8</span>
+								<span class="point"><c:out value="${list.countOfAnswer}"/></span>
 							</div>
 						</div>
 					</div>
 				</li>
+				</c:forEach>
+<!--
 				<li>
 					<div class="wrap">
 						<div class="main">
@@ -49,18 +52,21 @@
 						</div>
 					</div>
 				</li>
+-->
 			</ul>
 			<div class="row">
 				<div class="col-md-3"></div>
 				<div class="col-md-6 text-center">
 					<ul class="pagination center-block" style="display:inline-block;">
-						<li><a href="#">«</a></li>
-						<li><a href="#">1</a></li>
-						<li><a href="#">2</a></li>
-						<li><a href="#">3</a></li>
-						<li><a href="#">4</a></li>
-						<li><a href="#">5</a></li>
-						<li><a href="#">»</a></li>
+					    <c:if test="${paging.startPage > paging.pageNum}">
+						<li><a href="/?currentPage=${paging.startPage - paging.pageNum}&startPage=${paging.startPage - paging.pageNum}&endPage=${paging.endPage - paging.pageNum}">«</a></li>
+						</c:if>
+						<c:forEach begin="${paging.startPage}" end="${paging.endPage}" varStatus="status">
+						<li <c:if test="${status.current eq paging.currentPage}">class="active"</c:if>><a href="/?currentPage=${status.current}&endPage=${paging.endPage}&startPage=${paging.startPage}"><c:out value="${status.current}"/></a></li>
+						</c:forEach>
+						<c:if test="${paging.endPage < paging.totalPage}">
+						<li><a href="/?currentPage=${paging.startPage + paging.pageNum}&startPage=${paging.startPage + paging.pageNum}&endPage=${paging.endPage + paging.pageNum}">»</a></li>
+						</c:if>
 					</ul>
 				</div>
 				<div class="col-md-3 qna-write">
