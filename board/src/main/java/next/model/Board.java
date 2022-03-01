@@ -10,6 +10,8 @@ public class Board {
     private Date createdDate;
     private int countOfAnswer;
 
+    private Paging paging;
+
     public Board() {
     }
 
@@ -68,5 +70,13 @@ public class Board {
 
     public void setCountOfAnswer(int countOfAnswer) {
         this.countOfAnswer = countOfAnswer;
+    }
+
+    public Paging getPaging() {
+        return paging;
+    }
+
+    public void setPaging(Paging paging) {
+        this.paging = paging;
     }
 }
