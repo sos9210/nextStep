@@ -1,7 +1,7 @@
 package core.jdbc;
 
 public class DataAccessException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 666534523595327100L;
 
     public DataAccessException() {
         super();
