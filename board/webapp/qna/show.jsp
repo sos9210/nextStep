@@ -53,71 +53,44 @@
                   <div class="qna-comment-slipp">
                       <p class="qna-comment-count"><strong><c:out value="${board.countOfAnswer}"/></strong>개의 의견</p>
                       <div class="qna-comment-slipp-articles">
-<!--
-                          <article class="article" id="answer-1405">
+                      <c:forEach items="${answers}" var="list">
+                          <article class="article">
                               <div class="article-header">
                                   <div class="article-header-thumb">
                                       <img src="https://graph.facebook.com/v2.3/1324855987/picture" class="article-author-thumb" alt="">
                                   </div>
                                   <div class="article-header-text">
-                                      <a href="/users/1/자바지기" class="article-author-name">자바지기</a>
+                                      <a href="/users/${list.writer}/자바지기" class="article-author-name">${list.writer}</a>
                                       <a href="#answer-1434" class="article-header-time" title="퍼머링크">
-                                          2016-01-12 14:06
+                                          ${list.createDate}
                                       </a>
                                   </div>
                               </div>
                               <div class="article-doc comment-doc">
-                                  <p>이 글만으로는 원인 파악하기 힘들겠다. 소스 코드와 설정을 단순화해서 공유해 주면 같이 디버깅해줄 수도 있겠다.</p>
+                                  <p>${list.content}</p>
                               </div>
                               <div class="article-util">
                                   <ul class="article-util-list">
                                       <li>
-                                          <a class="link-modify-article" href="/questions/413/answers/1405/form">수정</a>
+                                          <a class="link-modify-article" href="/questions/${list.answerId}/answers/${list.writer}/form">수정</a>
                                       </li>
                                       <li>
-                                          <form class="form-delete" action="/questions/413/answers/1405" method="POST">
+                                          <form class="form-delete" action="/questions/${list.answerId}/answers/${list.writer}" method="POST">
                                               <input type="hidden" name="_method" value="DELETE">
                                               <button type="submit" class="link-delete-article">삭제</button>
                                           </form>
                                       </li>
                                   </ul>
                               </div>
-                          </article>
-                          <article class="article" id="answer-1406">
-                              <div class="article-header">
-                                  <div class="article-header-thumb">
-                                      <img src="https://graph.facebook.com/v2.3/1324855987/picture" class="article-author-thumb" alt="">
-                                  </div>
-                                  <div class="article-header-text">
-                                      <a href="/users/1/자바지기" class="article-author-name">자바지기</a>
-                                      <a href="#answer-1434" class="article-header-time" title="퍼머링크">
-                                          2016-01-12 14:06
-                                      </a>
-                                  </div>
-                              </div>
-                              <div class="article-doc comment-doc">
-                                  <p>이 글만으로는 원인 파악하기 힘들겠다. 소스 코드와 설정을 단순화해서 공유해 주면 같이 디버깅해줄 수도 있겠다.</p>
-                              </div>
-                              <div class="article-util">
-                                  <ul class="article-util-list">
-                                      <li>
-                                          <a class="link-modify-article" href="/questions/413/answers/1405/form">수정</a>
-                                      </li>
-                                      <li>
-                                          <form class="form-delete" action="/questions/413/answers/1405" method="POST">
-                                              <input type="hidden" name="_method" value="DELETE">
-                                              <button type="submit" class="link-delete-article">삭제</button>
-                                          </form>
-                                      </li>
-                                  </ul>
-                              </div>
-                          </article>
--->
-                          <form class="submit-write">
+                              </article>
+                          </c:forEach>
+                          <form class="submit-write" id="answerForm">
+                          <input type="hidden" name="questionId" value="<c:out value='${board.questionId}'/>"/>
+                          <input type="hidden" name="writer" value="customer"/>
                               <div class="form-group" style="padding:14px;">
-                                  <textarea class="form-control" placeholder="Update your status"></textarea>
+                                  <textarea class="form-control" name="content" placeholder="Update your status"></textarea>
                               </div>
-                              <button class="btn btn-success pull-right" type="button">Post</button>
+                              <button class="btn btn-success pull-right" onclick="javascript:addAnswer();" type="button">Post</button>
                               <div class="clearfix" />
                           </form>
                       </div>
@@ -127,7 +100,67 @@
         </div>
     </div>
 </div>
+<script>
+function addAnswer(){
+    var param = $("#answerForm").serialize();
+    $.ajax({
+        type : 'POST',
+        url : '/api/qna/addAnswer',
+        data : param,
+        dataType : 'json',
+        error : onError,
+        success : onSuccess,
+    });
 
+    function onSuccess(json,status) {
+        console.log(json.writer);
+        var answerTemplate = $("#answerTemplate").html();
+        var date = new Date(json.createDate);
+        var dateToString = date.getFullYear()+"-"
+                            +(date.getMonth() > 10 ? date.getMonth() : "0"+date.getMonth())+"-"
+                            +(date.getDate() > 10 ? date.getDate() : "0"+date.getDate());
+        var template = answerTemplate.format(json.writer, dateToString,json.content, json.answerId);
+        $("#answerForm").before(template);
+        var count = $(".qna-comment-count > strong").text();
+        $(".qna-comment-count > strong").text(parseInt(count)+1);
+        $("textarea[name=content]").val("");
+    }
+    function onError(response) {
+        console.log(response.responseText);
+    }
+}
+</script>
+<script type="text/template" id="answerTemplate">
+                          <article class="article">
+                              <div class="article-header">
+                                  <div class="article-header-thumb">
+                                      <img src="https://graph.facebook.com/v2.3/1324855987/picture" class="article-author-thumb" alt="">
+                                  </div>
+                                  <div class="article-header-text">
+                                      <a href="/users/{0}/자바지기" class="article-author-name">{0}</a>
+                                      <a href="#answer-1434" class="article-header-time" title="퍼머링크">
+                                          {1}
+                                      </a>
+                                  </div>
+                              </div>
+                              <div class="article-doc comment-doc">
+                                  <p>{2}</p>
+                              </div>
+                              <div class="article-util">
+                                  <ul class="article-util-list">
+                                      <li>
+                                          <a class="link-modify-article" href="/questions/{4}/answers/{0}/form">수정</a>
+                                      </li>
+                                      <li>
+                                          <form class="form-delete" action="/questions/{4}/answers/{0}" method="POST">
+                                              <input type="hidden" name="_method" value="DELETE">
+                                              <button type="submit" class="link-delete-article">삭제</button>
+                                          </form>
+                                      </li>
+                                  </ul>
+                              </div>
+                          </article>
+</script>
 <%@ include file="/include/footer.jspf" %>
 	</body>
 </html>

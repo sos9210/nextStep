@@ -5,6 +5,7 @@ import core.jdbc.PreparedStatementSetter;
 import core.jdbc.RowMapper;
 import next.model.Board;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BoardDao {
+
     public int insert(Board board) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
@@ -97,5 +99,13 @@ public class BoardDao {
             }
         };
         return jdbcTemplate.queryForObject("SELECT COUNT(QUESTIONID) CNT FROM QUESTIONS",rm,pss);
+    }
+
+    public int answerCntAdd(int questionId) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        String sql = "UPDATE QUESTIONS SET COUNTOFANSWER = " +
+                "(SELECT COUNTOFANSWER+1 FROM QUESTIONS WHERE QUESTIONID = ?) " +
+                "WHERE QUESTIONID = ?";
+        return jdbcTemplate.update(sql,questionId,questionId);
     }
 }
