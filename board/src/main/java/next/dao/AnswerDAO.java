@@ -61,4 +61,10 @@ public class AnswerDAO {
         String sql = "SELECT * FROM ANSWERS WHERE QUESTIONID = ?";
         return jdbcTemplate.query(sql,rowMapper,questionId);
     }
+
+    public int delete(Answer answer) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate();
+        String sql = "DELETE FROM ANSWERS WHERE ANSWERID = ? AND QUESTIONID = ?";
+        return jdbcTemplate.update(sql,answer.getAnswerId(),answer.getQuestionId());
+    }
 }

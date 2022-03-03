@@ -101,11 +101,11 @@ public class BoardDao {
         return jdbcTemplate.queryForObject("SELECT COUNT(QUESTIONID) CNT FROM QUESTIONS",rm,pss);
     }
 
-    public int answerCntAdd(int questionId) {
+    public int answerCntUpdt(int questionId, int cnt) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate();
         String sql = "UPDATE QUESTIONS SET COUNTOFANSWER = " +
-                "(SELECT COUNTOFANSWER+1 FROM QUESTIONS WHERE QUESTIONID = ?) " +
+                "(SELECT COUNTOFANSWER+(?) FROM QUESTIONS WHERE QUESTIONID = ?) " +
                 "WHERE QUESTIONID = ?";
-        return jdbcTemplate.update(sql,questionId,questionId);
+        return jdbcTemplate.update(sql,cnt,questionId,questionId);
     }
 }
