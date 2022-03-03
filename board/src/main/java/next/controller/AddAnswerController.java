@@ -20,7 +20,7 @@ public class AddAnswerController implements Controller {
         BoardDao bd = new BoardDao();
         int result = answerDAO.insert(answer);
         Answer findByAnswer = answerDAO.findByAnswer(result);
-        bd.answerCntAdd(findByAnswer.getQuestionId());
+        bd.answerCntUpdt(findByAnswer.getQuestionId(),1);
         ObjectMapper mapper = new ObjectMapper();
         resp.setContentType("application/json;charset=UTF-8");
         PrintWriter out = resp.getWriter();

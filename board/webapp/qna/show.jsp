@@ -39,7 +39,7 @@
                           <li>
                               <form class="form-delete" action="/questions/423" method="POST">
                                   <input type="hidden" name="_method" value="DELETE">
-                                  <button class="link-delete-article" type="submit">삭제</button>
+                                  <button class="link-delete-articleww" type="submit">삭제</button>
                               </form>
                           </li>
                           <li>
@@ -75,10 +75,7 @@
                                           <a class="link-modify-article" href="/questions/${list.answerId}/answers/${list.writer}/form">수정</a>
                                       </li>
                                       <li>
-                                          <form class="form-delete" action="/questions/${list.answerId}/answers/${list.writer}" method="POST">
-                                              <input type="hidden" name="_method" value="DELETE">
-                                              <button type="submit" class="link-delete-article">삭제</button>
-                                          </form>
+                                          <button type="button" data-question-id="${board.questionId}" data-answer-id="${list.answerId}" class="link-delete-article">삭제</button>
                                       </li>
                                   </ul>
                               </div>
@@ -100,66 +97,33 @@
         </div>
     </div>
 </div>
-<script>
-function addAnswer(){
-    var param = $("#answerForm").serialize();
-    $.ajax({
-        type : 'POST',
-        url : '/api/qna/addAnswer',
-        data : param,
-        dataType : 'json',
-        error : onError,
-        success : onSuccess,
-    });
-
-    function onSuccess(json,status) {
-        console.log(json.writer);
-        var answerTemplate = $("#answerTemplate").html();
-        var date = new Date(json.createDate);
-        var dateToString = date.getFullYear()+"-"
-                            +(date.getMonth() > 10 ? date.getMonth() : "0"+date.getMonth())+"-"
-                            +(date.getDate() > 10 ? date.getDate() : "0"+date.getDate());
-        var template = answerTemplate.format(json.writer, dateToString,json.content, json.answerId);
-        $("#answerForm").before(template);
-        var count = $(".qna-comment-count > strong").text();
-        $(".qna-comment-count > strong").text(parseInt(count)+1);
-        $("textarea[name=content]").val("");
-    }
-    function onError(response) {
-        console.log(response.responseText);
-    }
-}
-</script>
 <script type="text/template" id="answerTemplate">
-                          <article class="article">
-                              <div class="article-header">
-                                  <div class="article-header-thumb">
-                                      <img src="https://graph.facebook.com/v2.3/1324855987/picture" class="article-author-thumb" alt="">
-                                  </div>
-                                  <div class="article-header-text">
-                                      <a href="/users/{0}/자바지기" class="article-author-name">{0}</a>
-                                      <a href="#answer-1434" class="article-header-time" title="퍼머링크">
-                                          {1}
-                                      </a>
-                                  </div>
-                              </div>
-                              <div class="article-doc comment-doc">
-                                  <p>{2}</p>
-                              </div>
-                              <div class="article-util">
-                                  <ul class="article-util-list">
-                                      <li>
-                                          <a class="link-modify-article" href="/questions/{4}/answers/{0}/form">수정</a>
-                                      </li>
-                                      <li>
-                                          <form class="form-delete" action="/questions/{4}/answers/{0}" method="POST">
-                                              <input type="hidden" name="_method" value="DELETE">
-                                              <button type="submit" class="link-delete-article">삭제</button>
-                                          </form>
-                                      </li>
-                                  </ul>
-                              </div>
-                          </article>
+      <article class="article">
+          <div class="article-header">
+              <div class="article-header-thumb">
+                  <img src="https://graph.facebook.com/v2.3/1324855987/picture" class="article-author-thumb" alt="">
+              </div>
+              <div class="article-header-text">
+                  <a href="/users/{0}/자바지기" class="article-author-name">{0}</a>
+                  <a href="#answer-1434" class="article-header-time" title="퍼머링크">
+                      {1}
+                  </a>
+              </div>
+          </div>
+          <div class="article-doc comment-doc">
+              <p>{2}</p>
+          </div>
+          <div class="article-util">
+              <ul class="article-util-list">
+                  <li>
+                      <a class="link-modify-article" href="/questions/{3}/answers/{0}/form">수정</a>
+                  </li>
+                  <li>
+                      <button type="button" data-answer-id="{3}" data-question-id="${board.questionId}" class="link-delete-article">삭제</button>
+                  </li>
+              </ul>
+          </div>
+      </article>
 </script>
 <%@ include file="/include/footer.jspf" %>
 	</body>
