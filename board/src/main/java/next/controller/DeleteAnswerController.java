@@ -1,7 +1,10 @@
 package next.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import core.mvc.AbstractController;
 import core.mvc.Controller;
+import core.mvc.JsonView;
+import core.mvc.ModelAndView;
 import next.dao.AnswerDAO;
 import next.dao.BoardDao;
 import next.model.Answer;
@@ -12,9 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.Optional;
 
-public class DeleteAnswerController implements Controller {
+public class DeleteAnswerController extends AbstractController {
     @Override
-    public String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Answer answer = new Answer();
         setAnswer(req, answer);
 
@@ -23,16 +26,10 @@ public class DeleteAnswerController implements Controller {
 
         BoardDao bd = new BoardDao();
         bd.answerCntUpdt(answer.getQuestionId(), -1);
-
-        ObjectMapper mapper = new ObjectMapper();
-        resp.setContentType("application/json;charset=UTF-8");
-        PrintWriter out = resp.getWriter();
         if(adCnt > 0){
-            out.print(mapper.writeValueAsString(Result.ok()));
-        }else{
-            out.print(mapper.writeValueAsString(Result.fail("error message")));
+            return jsonView().addObject("status",true).addObject("message","");
         }
-        return null;
+        return jsonView().addObject("status",false).addObject("message","error message");
     }
 
     private void setAnswer(HttpServletRequest req, Answer answer) {
