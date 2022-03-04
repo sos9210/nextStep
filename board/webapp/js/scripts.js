@@ -11,7 +11,9 @@ function addAnswer(){
     });
 
     function onSuccess(json,status) {
-        console.log(json.writer);
+        console.log(json.answer);
+        var json = json.answer;
+        console.log(status)
         var answerTemplate = $("#answerTemplate").html();
         var date = new Date(json.createDate);
         var dateToString = date.getFullYear()+"-"

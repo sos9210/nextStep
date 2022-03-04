@@ -3,7 +3,10 @@ package next.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import core.mvc.AbstractController;
 import core.mvc.Controller;
+import core.mvc.JspView;
+import core.mvc.ModelAndView;
 import next.dao.BoardDao;
 import next.dao.UserDao;
 import next.model.Board;
@@ -14,10 +17,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
-public class HomeController implements Controller {
+public class HomeController extends AbstractController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @Override
-    public String execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView execute(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         UserDao userDao = new UserDao();
         BoardDao boardDao = new BoardDao();
         req.setAttribute("users", userDao.findAll());
@@ -44,6 +47,6 @@ public class HomeController implements Controller {
         logger.debug("paging :: {}", paging);
         req.setAttribute("board", list);
         req.setAttribute("paging", paging);
-        return "home.jsp";
+        return jspView("home.jsp");
     }
 }
