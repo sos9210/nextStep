@@ -1,8 +1,5 @@
 package core.web.filter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -15,12 +12,10 @@ import javax.servlet.annotation.WebFilter;
 
 @WebFilter("/*")
 public class CharacterEncodingFilter implements Filter {
-    private static final Logger logger = LoggerFactory.getLogger(CharacterEncodingFilter.class);
     private static final String DEFAULT_ENCODING = "UTF-8";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        logger.debug("CharacterEncodingFilter init");
     }
 
     @Override
