@@ -25,7 +25,9 @@ import next.controller.user.ProfileController;
 import next.controller.user.UpdateFormUserController;
 import next.controller.user.UpdateUserController;
 
-public class RequestMapping {
+import javax.servlet.http.HttpServletRequest;
+
+public class LegacyHandlerMapping implements HandlerMapping{
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
     private Map<String, Controller> mappings = new HashMap<>();
 
@@ -41,7 +43,6 @@ public class RequestMapping {
         mappings.put("/users/updateForm", new UpdateFormUserController());
         mappings.put("/users/update", new UpdateUserController());
         mappings.put("/qna/show", new ShowQuestionController());
-        mappings.put("/qna/form", new CreateFormQuestionController());
         mappings.put("/qna/create", new CreateQuestionController());
         mappings.put("/qna/updateForm", new UpdateFormQuestionController());
         mappings.put("/qna/update", new UpdateQuestionController());
@@ -54,8 +55,8 @@ public class RequestMapping {
         logger.info("Initialized Request Mapping!");
     }
 
-    public Controller findController(String url) {
-        return mappings.get(url);
+    public Controller getHandler(HttpServletRequest request) {
+        return mappings.get(request.getRequestURI());
     }
 
     void put(String url, Controller controller) {

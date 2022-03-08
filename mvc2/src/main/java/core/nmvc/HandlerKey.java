@@ -1,7 +1,6 @@
 package core.nmvc;
 
 import core.annotation.RequestMethod;
-
 public class HandlerKey {
     private String url;
     private RequestMethod requestMethod;
