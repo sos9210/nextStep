@@ -1,6 +1,7 @@
 package core.mvc;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -20,8 +21,9 @@ import org.slf4j.LoggerFactory;
 public class DispatcherServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
-
-    private List<HandlerMapping> handlerMapping = Lists.newArrayList();
+    //새로운 컨트롤러가 추가돼도 HandlerAdapter를 구현함으로써 동작가능하도록 한다
+    private List<HandlerAdapter> handlerAdapters = new ArrayList<>();
+    private List<HandlerMapping> handlerMapping = new ArrayList<>();
     @Override
     public void init() throws ServletException {
         LegacyHandlerMapping lhm = new LegacyHandlerMapping();
@@ -32,6 +34,9 @@ public class DispatcherServlet extends HttpServlet {
 
         handlerMapping.add(lhm);
         handlerMapping.add(ahm);
+
+        handlerAdapters.add(new ControllerHandlerAdapter());
+        handlerAdapters.add(new HandlerExecutionHandlerAdapter());
     }
 
     @Override
@@ -54,13 +59,13 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private ModelAndView excute(Object controller, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if(controller instanceof Controller){
-            return ((Controller)controller).execute(request,response);  //기존 컨트롤러
-        }else{
-            return ((HandlerExecution)controller).handle(request,response); //새롭게 추가된 컨트롤러
+        for (HandlerAdapter ha:handlerAdapters) {
+            if(ha.supports(controller)){
+                return ha.handler(request,response,controller);
+            }
         }
+        return null;
     }
-
     private Object getHandler(HttpServletRequest request) {
         //요청URL 처리가 가능한 핸들러를 조회하고 없으면 null반환
         for (HandlerMapping hm: handlerMapping) {

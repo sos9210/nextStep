@@ -18,7 +18,7 @@ public class JdbcTemplate {
             List row = (List) rowMapper.mapRow(rs);
             return row;
         }catch (SQLException e){
-            throw new DataAccessException();
+            throw new DataAccessException(e);
         }
     }
     public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... objects) throws DataAccessException {
@@ -30,7 +30,7 @@ public class JdbcTemplate {
             pss.setValue(pstmt);
             row = (List) rowMapper.mapRow(rs);
         }catch (SQLException e){
-            throw new DataAccessException();
+            throw new DataAccessException(e);
         }
         return (List) row;
     }
@@ -43,7 +43,7 @@ public class JdbcTemplate {
             T object = rowMapper.mapRow(rs);
             return object;
         }catch (SQLException e){
-            throw new DataAccessException();
+            throw new DataAccessException(e);
         }
     }
     public <T> T queryForObject(String sql,RowMapper<T> rowMapper,Object... objects) throws DataAccessException{
@@ -56,15 +56,17 @@ public class JdbcTemplate {
             T object = rowMapper.mapRow(rs);
             return object;
         }catch (SQLException e){
-            throw new DataAccessException();
+            throw new DataAccessException(e);
         }
     }
-    public void update(String sql, Object... objects) throws SQLException{
+    public void update(String sql, Object... objects) throws DataAccessException{
         try(Connection con = ConnectionManager.getConnection();
             PreparedStatement pstmt = con.prepareStatement(sql);) {
             PreparedStatementSetter pss = createPreparedStatementSetter(objects);
             pss.setValue(pstmt);
             pstmt.executeUpdate();
+        }catch (SQLException e){
+            throw new DataAccessException(e);
         }
     }
     public void update(String sql, PreparedStatementSetter pss) throws DataAccessException{
@@ -73,7 +75,7 @@ public class JdbcTemplate {
             pss.setValue(pstmt);
             pstmt.executeUpdate();
         }catch (SQLException e){
-            throw new DataAccessException();
+            throw new DataAccessException(e);
         }
     }
 
@@ -83,7 +85,7 @@ public class JdbcTemplate {
             pss.setValue(pstmt);
             pstmt.executeUpdate();
         }catch (SQLException e){
-            throw new DataAccessException();
+            throw new DataAccessException(e);
         }
     }
 
